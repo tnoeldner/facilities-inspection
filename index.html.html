@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Housing Inspection Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: University of North Dakota Branding -->
+    <!-- Application Structure Plan: A task-oriented SPA with two primary views, 'Custodial' and 'Maintenance', toggled by top-level buttons. This structure directly mirrors the user's goal of performing one of two distinct inspection types. Each view contains an interactive checklist where users can select ratings from dropdowns, add notes, and receive instant visual feedback (contextual descriptions). A final 'Submit & Email' function provides a clear, actionable output. This design was chosen to transform static checklists into an efficient, user-friendly digital workflow. -->
+    <!-- Visualization & Content Choices: Checklist -> Goal: Standardize evaluation -> Method: Interactive HTML form with dropdowns for APPA Levels 1-5 -> Interaction: Selecting a level dynamically displays its official description for inspector reference. Justification: Provides crucial context and ensures consistent scoring. General -> Goal: Export findings -> Method: HTML/JS 'Submit & Email' button -> Interaction: Gathers all form data, saves to SharePoint, and sends a formatted HTML email. Justification: Creates a tangible, shareable output for record-keeping and action plans. CONFIRMED: No SVG/Mermaid used; all visuals are HTML/CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* UND Gray accent */
+        }
+        @import url('https://rsms.me/inter/inter.css');
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #009A44; /* UND Green */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .gemini-btn {
+            background-color: #e5e7eb; /* Gray-200 */
+            color: #1f2937; /* Gray-800 */
+            border: 1px solid #d1d5db; /* Gray-300 */
+        }
+        .gemini-btn:hover {
+            background-color: #d1d5db; /* Gray-300 */
+        }
+        .gemini-btn:disabled {
+            background-color: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .help-btn {
+             background-color: #e5e7eb; /* Gray-200 */
+             color: #1f2937; /* Gray-800 */
+             border: 1px solid #d1d5db; /* Gray-300 */
+             font-weight: bold;
+        }
+         .help-btn:hover {
+            background-color: #d1d5db; /* Gray-300 */
+        }
+        .modal-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-700">University Housing Inspection Tool</h1>
+            <p class="text-gray-500 mt-2">Use the checklists below to evaluate building conditions based on APPA standards and best practices.</p>
+        </header>
+
+        <nav class="flex justify-center mb-8 bg-white p-2 rounded-lg shadow-sm w-full md:w-auto mx-auto">
+            <button id="show-custodial" class="nav-button active text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-md">Custodial Evaluation</button>
+            <button id="show-maintenance" class="nav-button text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-md">Maintenance Evaluation</button>
+        </nav>
+
+        <main id="main-content">
+            <!-- Custodial View -->
+            <div id="custodial-view">
+                <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                    <h2 class="text-2xl font-bold mb-4 text-[#009A44]">Custodial Building Evaluation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <select id="custodial-building" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                            <option value="">Select a Building...</option>
+                            <option value="Noren Hall">Noren Hall</option>
+                            <option value="Selke Hall">Selke Hall</option>
+                            <option value="Brannon Hall">Brannon Hall</option>
+                            <option value="McVey Hall">McVey Hall</option>
+                            <option value="West Hall">West Hall</option>
+                            <option value="Landing Zone">Landing Zone</option>
+                            <option value="Wilkerson Commons">Wilkerson Commons</option>
+                            <option value="Swanson Hall">Swanson Hall</option>
+                            <option value="Smith Hall">Smith Hall</option>
+                            <option value="Johnstone Hall">Johnstone Hall</option>
+                            <option value="University Place">University Place</option>
+                            <option value="3600 Campus Rd">3600 Campus Rd</option>
+                            <option value="3605 Manitoba">3605 Manitoba</option>
+                            <option value="110 State St">110 State St</option>
+                            <option value="Williamsburg">Williamsburg</option>
+                            <option value="Mt. Vernon">Mt. Vernon</option>
+                            <option value="Virginia Rose">Virginia Rose</option>
+                            <option value="Townhouses">Townhouses</option>
+                            <option value="72 Plex">72 Plex</option>
+                            <option value="Berkely Drive">Berkely Drive</option>
+                            <option value="540 CC">540 CC</option>
+                            <option value="550 CC">550 CC</option>
+                            <option value="580 CC">580 CC</option>
+                            <option value="560 CC">560 CC</option>
+                            <option value="570 CC">570 CC</option>
+                        </select>
+                        <input type="date" id="custodial-date" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                        <input type="text" id="custodial-inspector" placeholder="Inspector Name" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                    </div>
+                    
+                    <div class="bg-[#e6f5ec] border-l-4 border-[#009A44] text-green-900 p-4 rounded-md mb-6">
+                        <h4 class="font-bold">APPA Service Levels</h4>
+                        <p class="text-sm">Select a level for each item. The definition will appear below it. Click the help button (?) on an item for the detailed rubric.</p>
+                    </div>
+
+                    <div id="custodial-checklist"></div>
+                    
+                    <div class="mt-8">
+                         <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-700">Summary & Follow-Up</h3>
+                         </div>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <textarea id="custodial-success" placeholder="Areas of Success..." class="w-full p-2 border rounded-md h-24 mb-2"></textarea>
+                                <button class="gemini-btn font-semibold py-1 px-3 rounded-md text-sm w-full" data-target="custodial-success" data-type="success">✨ Summarize Successes</button>
+                            </div>
+                            <div>
+                                <textarea id="custodial-improvement" placeholder="Areas for Improvement..." class="w-full p-2 border rounded-md h-24 mb-2"></textarea>
+                                <button class="gemini-btn font-semibold py-1 px-3 rounded-md text-sm w-full" data-target="custodial-improvement" data-type="improvement">✨ Suggest Improvements</button>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance View -->
+            <div id="maintenance-view" class="hidden">
+                 <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                    <h2 class="text-2xl font-bold mb-4 text-[#009A44]">Maintenance Building Evaluation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <select id="maintenance-building" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                            <option value="">Select a Building...</option>
+                             <option value="Noren Hall">Noren Hall</option>
+                            <option value="Selke Hall">Selke Hall</option>
+                            <option value="Brannon Hall">Brannon Hall</option>
+                            <option value="McVey Hall">McVey Hall</option>
+                            <option value="West Hall">West Hall</option>
+                            <option value="Landing Zone">Landing Zone</option>
+                            <option value="Wilkerson Commons">Wilkerson Commons</option>
+                            <option value="Swanson Hall">Swanson Hall</option>
+                            <option value="Smith Hall">Smith Hall</option>
+                            <option value="Johnstone Hall">Johnstone Hall</option>
+                            <option value="University Place">University Place</option>
+                            <option value="3600 Campus Rd">3600 Campus Rd</option>
+                            <option value="3605 Manitoba">3605 Manitoba</option>
+                            <option value="110 State St">110 State St</option>
+                            <option value="Williamsburg">Williamsburg</option>
+                            <option value="Mt. Vernon">Mt. Vernon</option>
+                            <option value="Virginia Rose">Virginia Rose</option>
+                            <option value="Townhouses">Townhouses</option>
+                            <option value="72 Plex">72 Plex</option>
+                            <option value="Berkely Drive">Berkely Drive</option>
+                            <option value="540 CC">540 CC</option>
+                            <option value="550 CC">550 CC</option>
+                            <option value="580 CC">580 CC</option>
+                            <option value="560 CC">560 CC</option>
+                            <option value="570 CC">570 CC</option>
+                        </select>
+                        <input type="date" id="maintenance-date" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                        <input type="text" id="maintenance-inspector" placeholder="Inspector Name" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                    </div>
+                     <div class="bg-[#e6f5ec] border-l-4 border-[#009A44] text-green-900 p-4 rounded-md mb-6">
+                        <h4 class="font-bold">APPA Service Levels</h4>
+                        <p class="text-sm">Select a level for each item. The definition will appear below it. Click the help button (?) on an item for the detailed rubric.</p>
+                    </div>
+                    
+                    <div id="maintenance-checklist"></div>
+
+                    <div class="mt-8">
+                         <h3 class="text-xl font-bold mb-2 text-gray-700">Summary & Follow-Up</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <textarea id="maintenance-success" placeholder="Areas of Success..." class="w-full p-2 border rounded-md h-24 mb-2"></textarea>
+                                <button class="gemini-btn font-semibold py-1 px-3 rounded-md text-sm w-full" data-target="maintenance-success" data-type="success">✨ Summarize Successes</button>
+                            </div>
+                            <div>
+                                <textarea id="maintenance-improvement" placeholder="Areas for Improvement / Urgent Repairs..." class="w-full p-2 border rounded-md h-24 mb-2"></textarea>
+                                <button class="gemini-btn font-semibold py-1 px-3 rounded-md text-sm w-full" data-target="maintenance-improvement" data-type="improvement">✨ Suggest Improvements</button>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-8">
+                <button id="submit-and-email" class="bg-black text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors shadow-lg">
+                    Submit & Email Report
+                </button>
+                <p id="status-message" class="text-sm text-gray-500 mt-2 h-4"></p>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-6 md:p-8 max-w-2xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-800">Rubric Title</h3>
+                <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+            </div>
+            <div id="modal-content" class="text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- Help content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const custodialView = document.getElementById('custodial-view');
+            const maintenanceView = document.getElementById('maintenance-view');
+            const showCustodialBtn = document.getElementById('show-custodial');
+            const showMaintenanceBtn = document.getElementById('show-maintenance');
+            const submitAndEmailBtn = document.getElementById('submit-and-email');
+            const statusMessage = document.getElementById('status-message');
+            const mainContent = document.getElementById('main-content');
+            
+            const helpModal = document.getElementById('help-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            let activeView = 'custodial';
+            
+            const custodialAppaLevels = {
+                '0': 'Select a level...',
+                '1': 'Level 1: Orderly Spotlessness',
+                '2': 'Level 2: Ordinary Tidiness',
+                '3': 'Level 3: Casual Inattention',
+                '4': 'Level 4: Moderate Dinginess',
+                '5': 'Level 5: Unkempt Neglect'
+            };
+
+            const maintenanceAppaLevels = {
+                '0': 'Select a level...',
+                '1': 'Level 1: Like-New Condition',
+                '2': 'Level 2: Good Condition',
+                '3': 'Level 3: Fair Condition',
+                '4': 'Level 4: Poor Condition',
+                '5': 'Level 5: Critical/Failed Condition'
+            };
+
+            const custodialData = [
+                { category: 'Common Areas (Lobbies, Hallways, Lounges)', items: ['Flooring (Hard Surface)', 'Flooring (Carpet/Rugs)', 'Walls & Baseboards', 'Entrances & Glass', 'Furniture & Upholstery', 'Lighting Fixtures', 'Trash & Recycling Bins', 'Drinking Fountains', 'Odor Control'] },
+                { category: 'Restrooms (Common/Public)', items: ['Floors & Drains', 'Toilets & Urinals', 'Sinks & Countertops', 'Mirrors & Dispensers', 'Stall Partitions', 'Trash Receptacles', 'Ventilation & Odor'] },
+                { category: 'Ancillary Spaces (Kitchens, Laundry, Study Rooms)', items: ['Flooring', 'Countertops & Sinks', 'Appliances (Exterior)', 'Laundry Machines (Exterior)', 'Furniture (Tables/Chairs)', 'Trash & Recycling Bins'] }
+            ];
+            
+            const maintenanceData = [
+                { category: 'Building Exterior & Envelope', items: ['Foundation & Walls', 'Windows & Seals', 'Doors & Hardware', 'Roof & Gutters', 'Walkways & Stairs', 'Exterior Lighting'] },
+                { category: 'Interior Common Areas (Lobbies, Hallways, Stairs)', items: ['Flooring Condition', 'Wall & Ceiling Condition', 'Paint Condition', 'Doors & Hardware', 'Handrails & Guardrails', 'Lighting (Functionality)', 'HVAC Vents & Grilles', 'Fire & Life Safety'] },
+                { category: 'Building Systems (General Observations)', items: ['HVAC Operation', 'Plumbing (Public Areas)', 'Electrical (Outlets/Switches)', 'Elevator Operation'] },
+                { category: 'Apartments/Dorms (Sample Inspection)', items: ['Door & Lockset', 'Paint & Wall Condition', 'Flooring Condition', 'Windows & Blinds', 'Plumbing Fixtures', 'Appliances (If applicable)', 'Lighting & Electrical'] }
+            ];
+
+            const custodialItemHelpContent = {
+                'Flooring (Hard Surface)': `<strong>Level 1:</strong> High gloss finish, free of streaks, scuffs, and dirt. Corners and edges are spotless.<br><strong>Level 3:</strong> Generally clean but may have a dull finish, minor scuffs, or slight dirt buildup in corners.<br><strong>Level 5:</strong> Visibly dirty, sticky, or stained. Obvious neglect.`,
+                'Flooring (Carpet/Rugs)': `<strong>Level 1:</strong> Uniform appearance, no spots, stains, or matted areas. Smells fresh.<br><strong>Level 3:</strong> Clean from vacuuming, but may have small, old stains. High-traffic areas may show some wear.<br><strong>Level 5:</strong> Multiple large stains, matted appearance, visible debris, and/or unpleasant odor.`,
+                'Walls & Baseboards': `<strong>Level 1:</strong> Free of all marks, scuffs, and fingerprints. Baseboards are completely clean.<br><strong>Level 3:</strong> Minor scuffs or marks are visible upon close inspection. Baseboards may have dust.<br><strong>Level 5:</strong> Widespread marks, graffiti, or heavy soil. Baseboards are dirty or damaged.`,
+                'Entrances & Glass': `<strong>Level 1:</strong> Glass is perfectly clear, free of streaks, smudges, and handprints. Door frames and hardware are clean.<br><strong>Level 3:</strong> Glass is mostly clean but has a few minor smudges or streaks. Some dust on frames.<br><strong>Level 5:</strong> Glass is cloudy, covered in handprints, or has heavy soil.`,
+                'Furniture & Upholstery': `<strong>Level 1:</strong> Arranged neatly, dust-free, and upholstery is free of spots or stains.<br><strong>Level 3:</strong> Generally tidy but may have light dust or a few minor spots on upholstery.<br><strong>Level 5:</strong> Visibly dusty, stained, or disarranged.`,
+                'Lighting Fixtures': `<strong>Level 1:</strong> Fixtures and lenses are completely clean, free of dust, dirt, and insects.<br><strong>Level 3:</strong> Light dusting is apparent on fixtures; a few dead insects may be present.<br><strong>Level 5:</strong> Fixtures are heavily coated in dust or have a large accumulation of dead insects.`,
+                'Trash & Recycling Bins': `<strong>Level 1:</strong> Bins are empty, clean inside and out, and have a fresh liner. No odor.<br><strong>Level 3:</strong> Bins have been emptied but may have minor residue or a slight odor.<br><strong>Level 5:</strong> Bins are overflowing, dirty, and have a strong, unpleasant odor.`,
+                'Drinking Fountains': `<strong>Level 1:</strong> Basin and fixtures are spotless, polished, and free of mineral deposits.<br><strong>Level 3:</strong> Basin is clean but may have water spots or minor mineral buildup.<br><strong>Level 5:</strong> Basin is dirty, stained, or has significant mineral deposits.`,
+                'Odor Control': `<strong>Level 1:</strong> The area has a fresh, clean scent, or no scent at all.<br><strong>Level 3:</strong> The area is mostly neutral but may have a faint, lingering odor.<br><strong>Level 5:</strong> A strong, persistent, and unpleasant odor is immediately noticeable.`,
+                'Floors & Drains': `<strong>Level 1:</strong> Floor and grout are perfectly clean and dry. Drains are clear and odor-free.<br><strong>Level 3:</strong> Floor is clean but may be damp or have minor stains. Grout may be slightly discolored.<br><strong>Level 5:</strong> Floor is wet, dirty, or has standing water. Strong odor from drains.`,
+                'Toilets & Urinals': `<strong>Level 1:</strong> Fixtures are gleaming inside and out. No stains, mineral rings, or odors.<br><strong>Level 3:</strong> Fixtures have been cleaned but may have minor water spots or a faint stain.<br><strong>Level 5:</strong> Visible soil, heavy stains, or strong odors are present.`,
+                'Sinks & Countertops': `<strong>Level 1:</strong> Sinks, faucets, and countertops are clean, dry, and polished. No soap residue or spots.<br><strong>Level 3:</strong> Surfaces are wiped down but may have water spots or minor soap residue.<br><strong>Level 5:</strong> Sinks or countertops are dirty, have soap scum buildup, or are cluttered.`,
+                'Mirrors & Dispensers': `<strong>Level 1:</strong> Mirrors are spotless. Dispensers are clean, full, and functional.<br><strong>Level 3:</strong> Mirrors have a few minor spots. Dispensers may have some dust or fingerprints.<br><strong>Level 5:</strong> Mirrors are cloudy or heavily spotted. Dispensers are empty, dirty, or broken.`,
+                'Stall Partitions': `<strong>Level 1:</strong> Partitions are free of all marks, dust, and graffiti.<br><strong>Level 3:</strong> Partitions have a few minor scuffs or marks.<br><strong>Level 5:</strong> Partitions are heavily marked, have graffiti, or are dirty to the touch.`,
+                'Trash Receptacles': `<strong>Level 1:</strong> Bins are empty, clean inside and out, and have a fresh liner. No odor.<br><strong>Level 3:</strong> Bins have been emptied but may have minor residue or a slight odor.<br><strong>Level 5:</strong> Bins are overflowing, dirty, and have a strong, unpleasant odor.`,
+                'Ventilation & Odor': `<strong>Level 1:</strong> Vents are clean and dust-free. The air smells fresh and clean.<br><strong>Level 3:</strong> Vents may have light dust. A faint, stuffy odor may be present.<br><strong>Level 5:</strong> Vents are heavily caked with dust. A strong, unpleasant odor is immediately noticeable.`,
+                'Flooring': `See "Flooring (Hard Surface)" or "Flooring (Carpet/Rugs)" rubrics.`,
+                'Countertops & Sinks': `See "Sinks & Countertops" rubric.`,
+                'Appliances (Exterior)': `<strong>Level 1:</strong> Exteriors of all appliances are spotless, free of fingerprints, spills, and grease.<br><strong>Level 3:</strong> Appliances are wiped down but may have minor streaks or fingerprints.<br><strong>Level 5:</strong> Appliances have visible spills, grease, or heavy soiling.`,
+                'Laundry Machines (Exterior)': `<strong>Level 1:</strong> Exteriors, lids, and control panels are clean and free of detergent residue or dust.<br><strong>Level 3:</strong> Machines have minor dust or detergent residue.<br><strong>Level 5:</strong> Machines are heavily soiled with spilled detergent, dirt, or lint.`,
+                'Furniture (Tables/Chairs)': `<strong>Level 1:</strong> Tables and chairs are clean, wiped down, and arranged neatly.<br><strong>Level 3:</strong> Surfaces are generally clean but may have crumbs or be slightly out of place.<br><strong>Level 5:</strong> Surfaces are sticky, dirty, or cluttered. Furniture is disorganized.`
+            };
+            
+            const maintenanceItemHelpContent = {
+                'Foundation & Walls': `<strong>Level 1:</strong> No visible cracks, spalling, or water intrusion. Paint or brickwork is in perfect condition.<br><strong>Level 3:</strong> Minor, non-structural hairline cracks or minor efflorescence (white, powdery deposits).<br><strong>Level 5:</strong> Significant structural cracks, water damage, or spalling (flaking/chipping) is visible.`,
+                'Windows & Seals': `<strong>Level 1:</strong> Glass is intact, seals are perfect with no drafts or condensation. Hardware operates smoothly.<br><strong>Level 3:</strong> Minor drafts can be felt. Seal may show signs of aging. Hardware is functional but may be stiff.<br><strong>Level 5:</strong> Window is broken, seal has failed (fogging between panes), or it will not lock/close properly.`,
+                'Doors & Hardware': `<strong>Level 1:</strong> Door opens, closes, and latches smoothly. No damage to door or frame. Closer works correctly.<br><strong>Level 3:</strong> Door squeaks or rubs the frame. Finish is worn. Hardware is functional but loose.<br><strong>Level 5:</strong> Door does not close, latch, or lock. Significant damage to the door or frame.`,
+                'Roof & Gutters': `<strong>Level 1:</strong> No missing shingles or visible damage. Gutters are clean and securely attached.<br><strong>Level 3:</strong> Minor granule loss on shingles. Gutters contain a small amount of debris but are functional.<br><strong>Level 5:</strong> Missing/damaged shingles, obvious leaks, or gutters are clogged, detached, or damaged.`,
+                'Walkways & Stairs': `<strong>Level 1:</strong> Concrete/asphalt is level and free of cracks or trip hazards. Handrails are secure.<br><strong>Level 3:</strong> Minor surface cracks or slight unevenness that does not pose a trip hazard.<br><strong>Level 5:</strong> Significant cracks, heaving, or spalling creating a clear trip hazard. Handrails are loose or missing.`,
+                'Exterior Lighting': `<strong>Level 1:</strong> All fixtures are functional, clean, and properly aimed. Covers are intact.<br><strong>Level 3:</strong> One or two bulbs in a large area are out. Fixtures may be dirty.<br><strong>Level 5:</strong> Widespread outages creating a safety/security issue. Fixtures are broken or missing.`,
+                'Flooring Condition': `<strong>Level 1:</strong> Flooring is in like-new condition. No broken tiles, torn carpet, or significant scratches.<br><strong>Level 3:</strong> Flooring shows normal wear and tear, such as minor scratches or worn carpet in high-traffic areas.<br><strong>Level 5:</strong> Flooring is a trip hazard (torn carpet, broken tiles) or has widespread, significant damage.`,
+                'Wall & Ceiling Condition': `<strong>Level 1:</strong> Surfaces are smooth and free of holes, cracks, or water stains.<br><strong>Level 3:</strong> Minor dings, scuffs, or small nail holes are present. Stress cracks may be visible.<br><strong>Level 5:</strong> Large holes, widespread cracking, or active water stains are visible.`,
+                'Paint Condition': `<strong>Level 1:</strong> Paint is fresh, with a uniform finish. No scuffs, chips, or peeling.<br><strong>Level 3:</strong> Paint has numerous scuffs or is faded. Minor chipping is present.<br><strong>Level 5:</strong> Widespread peeling, chipping, or graffiti is present.`,
+                'Handrails & Guardrails': `<strong>Level 1:</strong> Securely mounted, meets code, and finish is in good condition.<br><strong>Level 3:</strong> Secure, but the finish is worn or scratched.<br><strong>Level 5:</strong> Loose, damaged, or missing, posing a direct safety hazard.`,
+                'Lighting (Functionality)': `<strong>Level 1:</strong> All lights are functional. Lenses and covers are intact and clean.<br><strong>Level 3:</strong> A single bulb in a non-critical area is out.<br><strong>Level 5:</strong> Multiple or widespread outages, especially in critical areas like stairwells. Broken fixtures.`,
+                'HVAC Vents & Grilles': `<strong>Level 1:</strong> Vents are clean, undamaged, and direct airflow correctly.<br><strong>Level 3:</strong> Vents are dusty or have minor cosmetic damage (bent fins).<br><strong>Level 5:</strong> Vent is missing, heavily damaged, or completely blocked.`,
+                'Fire & Life Safety': `<strong>Level 1:</strong> All devices (smoke detectors, sprinklers, exit signs, extinguishers) are present, in-date, and show no signs of tampering or damage.<br><strong>Level 3:</strong> An exit sign light is burnt out (but still visible). Extinguisher tag is nearing its inspection date.<br><strong>Level 5:</strong> Device is missing, expired, has been tampered with, or is visibly damaged. A clear safety violation.`,
+                'HVAC Operation': `<strong>Level 1:</strong> System provides appropriate heating/cooling, operates quietly, and thermostats are functional.<br><strong>Level 3:</strong> System is operational but may be noisy or struggling to maintain temperature.<br><strong>Level 5:</strong> System is not providing heating or cooling. Obvious signs of major failure (leaks, loud noises).`,
+                'Plumbing (Public Areas)': `<strong>Level 1:</strong> No leaks, drips, or clogs. Fixtures are secure. Good water pressure.<br><strong>Level 3:</strong> A faucet has a slow drip or a drain is slow. Minor issues requiring a work order.<br><strong>Level 5:</strong> Active leak, clogged drain, or non-functional fixture requiring immediate attention.`,
+                'Electrical (Outlets/Switches)': `<strong>Level 1:</strong> All outlets and switches work. Plates are intact and not cracked.<br><strong>Level 3:</strong> A single outlet is non-functional, or a switch plate is cracked.<br><strong>Level 5:</strong> Multiple dead outlets, signs of arcing (burn marks), or missing/broken plates exposing wiring.`,
+                'Elevator Operation': `<strong>Level 1:</strong> Travels smoothly, levels correctly at floors, buttons and indicators work perfectly. Clean interior.<br><strong>Level 3:</strong> May be slightly noisy or not level perfectly with the floor. Interior may be scuffed.<br><strong>Level 5:</strong> Out of service, makes alarming noises, or fails to level properly, creating a trip hazard.`,
+                'Door & Lockset': `<strong>Level 1:</strong> Door, frame, and hardware are in perfect condition. Door opens, closes, and locks smoothly.<br><strong>Level 3:</strong> Door or frame have minor cosmetic damage. Lock is functional but may be sticky.<br><strong>Level 5:</strong> Door is damaged and will not close or lock. Lockset is broken.`,
+                'Windows & Blinds': `<strong>Level 1:</strong> Window is in perfect condition (see exterior). Blinds are clean, intact, and operate smoothly.<br><strong>Level 3:</strong> Blinds may have slightly bent slats or be difficult to operate.<br><strong>Level 5:</strong> Blinds are broken, missing slats, or non-functional.`,
+                'Plumbing Fixtures': `<strong>Level 1:</strong> All fixtures (sinks, toilets, showers) are in perfect working order with no leaks, clogs, or cosmetic damage.<br><strong>Level 3:</strong> A faucet drips, a toilet runs intermittently, or a drain is slow.<br><strong>Level 5:</strong> Fixture is non-functional, has a significant leak, or is badly damaged.`,
+                'Appliances (If applicable)': `<strong>Level 1:</strong> All appliances are clean and in perfect working order.<br><strong>Level 3:</strong> An appliance is functional but may be noisy or show signs of significant wear.<br><strong>Level 5:</strong> An essential appliance (refrigerator, stove) is non-functional.`
+            };
+
+            function createChecklist(container, data) {
+                container.innerHTML = '';
+                data.forEach(section => {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'mb-8';
+                    sectionDiv.innerHTML = `<h3 class="text-xl font-bold mb-4 pb-2 border-b text-gray-700">${section.category}</h3>`;
+                    
+                    const itemsGrid = document.createElement('div');
+                    itemsGrid.className = 'space-y-4';
+                    
+                    section.items.forEach(item => {
+                        const itemWrapper = document.createElement('div');
+                        itemWrapper.className = 'p-4 border rounded-lg bg-gray-50';
+                        
+                        const itemHeader = document.createElement('div');
+                        itemHeader.className = 'flex items-center space-x-2 md:col-span-1';
+                        
+                        const label = document.createElement('label');
+                        label.className = 'font-semibold text-gray-700';
+                        label.textContent = item;
+                        itemHeader.appendChild(label);
+                        
+                        const helpButton = document.createElement('button');
+                        helpButton.className = 'help-btn rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs';
+                        helpButton.textContent = '?';
+                        helpButton.dataset.item = item;
+                        itemHeader.appendChild(helpButton);
+                        
+                        const itemContent = document.createElement('div');
+                        itemContent.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 items-start';
+
+                        const controls = `
+                            <div class="md:col-span-3 grid grid-cols-1 gap-2 mt-2">
+                                <select class="w-full p-2 border rounded-md appa-level-select">
+                                    <option value="0">Select Level</option>
+                                    <option value="1">Level 1</option>
+                                    <option value="2">Level 2</option>
+                                    <option value="3">Level 3</option>
+                                    <option value="4">Level 4</option>
+                                    <option value="5">Level 5</option>
+                                </select>
+                                <p class="text-xs text-gray-500 italic p-2 rounded-md bg-white min-h-[1.5em]"></p>
+                                <textarea placeholder="Inspector Notes & Action Items..." class="w-full p-2 border rounded-md mt-2 h-20 text-sm"></textarea>
+                            </div>
+                        `;
+                        
+                        const controlsWrapper = document.createElement('div');
+                        controlsWrapper.innerHTML = controls;
+
+                        itemWrapper.appendChild(itemHeader);
+                        itemWrapper.appendChild(controlsWrapper);
+                        itemsGrid.appendChild(itemWrapper);
+                    });
+
+                    sectionDiv.appendChild(itemsGrid);
+                    container.appendChild(sectionDiv);
+                });
+            }
+
+            const custodialChecklistContainer = document.getElementById('custodial-checklist');
+            createChecklist(custodialChecklistContainer, custodialData);
+
+            const maintenanceChecklistContainer = document.getElementById('maintenance-checklist');
+            createChecklist(maintenanceChecklistContainer, maintenanceData);
+
+            function handleAppaSelectChange(e, levelDescriptions) {
+                const select = e.target;
+                if (select.classList.contains('appa-level-select')) {
+                    const level = select.value;
+                    const helpText = select.nextElementSibling;
+                    helpText.textContent = levelDescriptions[level];
+                }
+            }
+            
+            custodialChecklistContainer.addEventListener('change', (e) => handleAppaSelectChange(e, custodialAppaLevels));
+            maintenanceChecklistContainer.addEventListener('change', (e) => handleAppaSelectChange(e, maintenanceAppaLevels));
+            
+            function switchView(view) {
+                activeView = view;
+                if (view === 'custodial') {
+                    custodialView.classList.remove('hidden');
+                    maintenanceView.classList.add('hidden');
+                    showCustodialBtn.classList.add('active');
+                    showMaintenanceBtn.classList.remove('active');
+                } else {
+                    custodialView.classList.add('hidden');
+                    maintenanceView.classList.remove('hidden');
+                    showCustodialBtn.classList.remove('active');
+                    showMaintenanceBtn.classList.add('active');
+                }
+            }
+            
+            showCustodialBtn.addEventListener('click', () => switchView('custodial'));
+            showMaintenanceBtn.addEventListener('click', () => switchView('maintenance'));
+
+            // Modal Logic
+            function showModal(title, content) {
+                modalTitle.textContent = title;
+                modalContent.innerHTML = content || '<p>No rubric available for this item.</p>';
+                helpModal.classList.remove('hidden');
+            }
+
+            function hideModal() {
+                helpModal.classList.add('hidden');
+            }
+
+            modalCloseBtn.addEventListener('click', hideModal);
+            helpModal.addEventListener('click', (e) => {
+                if (e.target === helpModal) {
+                    hideModal();
+                }
+            });
+
+            mainContent.addEventListener('click', (e) => {
+                if(e.target.classList.contains('help-btn')) {
+                    const item = e.target.dataset.item;
+                    if (activeView === 'custodial') {
+                        showModal(item, custodialItemHelpContent[item]);
+                    } else {
+                        showModal(item, maintenanceItemHelpContent[item] || custodialItemHelpContent[item]);
+                    }
+                }
+            });
+
+            async function callGeminiAPI(prompt, button) {
+                // !! IMPORTANT !! PASTE YOUR GEMINI API KEY HERE
+                const apiKey = "AIzaSyCxo29Q6HRHRzxTuTU_IanG9yvJmctdzb0"; 
+                if (apiKey === "PASTE_YOUR_GEMINI_API_KEY_HERE") {
+                    console.error("Gemini API key is not set.");
+                    const targetId = button.dataset.target;
+                    const targetTextarea = document.getElementById(targetId);
+                    targetTextarea.value = "Error: Gemini API key is not configured in the HTML file. Please add your key to use this feature.";
+                    return;
+                }
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+                
+                button.disabled = true;
+                const originalText = button.innerHTML;
+                button.innerHTML = '✨ Thinking...';
+                
+                const payload = { contents: [{ parts: [{ text: prompt }] }] };
+
+                let responseText = '';
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`API Error: ${response.status} ${await response.text()}`);
+                    const result = await response.json();
+                    responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || 'Could not generate a response.';
+                } catch (error) {
+                    console.error("Gemini API call failed:", error);
+                    responseText = 'Error connecting to the AI service. Please check the console for details.';
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+                const targetId = button.dataset.target;
+                const targetTextarea = document.getElementById(targetId);
+                targetTextarea.value = responseText;
+            }
+
+            document.querySelectorAll('.gemini-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    let checklistContainer, building, evaluationType;
+                    let findings = [];
+                    let prompt = '';
+
+                    if (activeView === 'custodial') {
+                        checklistContainer = custodialChecklistContainer;
+                        building = document.getElementById('custodial-building').value || 'the building';
+                        evaluationType = 'custodial';
+                    } else {
+                        checklistContainer = maintenanceChecklistContainer;
+                        building = document.getElementById('maintenance-building').value || 'the building';
+                        evaluationType = 'maintenance';
+                    }
+
+                    checklistContainer.querySelectorAll('select.appa-level-select').forEach(select => {
+                        const itemWrapper = select.closest('.p-4');
+                        const item = itemWrapper.querySelector('label').textContent;
+                        const level = select.value;
+                        const notes = itemWrapper.querySelector('textarea').value;
+                        if (level !== '0') {
+                            findings.push({ item, rating: `Level ${level}`, notes });
+                        }
+                    });
+
+                    if (button.dataset.type === 'success') {
+                        const goodFindings = findings.filter(f => ['Level 1', 'Level 2'].includes(f.rating)).map(f => `- ${f.item}: ${f.rating}`).join('\n');
+                        if (!goodFindings) {
+                           document.getElementById(button.dataset.target).value = "No items with high ratings (Level 1 or 2) were found to summarize.";
+                           return;
+                        }
+                        prompt = `Act as a facilities manager writing a positive report summary. Based on the following excellent ${evaluationType} inspection findings for ${building}, write a brief, professional paragraph summarizing the areas where the team is excelling. Mention one or two specific examples from the list.\n\nEXCELLENT FINDINGS:\n${goodFindings}`;
+                    } else { // improvement
+                        const badFindings = findings.filter(f => ['Level 3', 'Level 4', 'Level 5'].includes(f.rating)).map(f => `- ${f.item}: ${f.rating}${f.notes ? ` (Inspector Notes: ${f.notes})` : ''}`).join('\n');
+                        if (!badFindings) {
+                            document.getElementById(button.dataset.target).value = "No items needing improvement (Level 3, 4, or 5) were found.";
+                            return;
+                        }
+                        prompt = `Act as a facilities manager creating a work order summary for ${building}. Based on the following ${evaluationType} inspection findings, generate a concise, bulleted list of the most important action items for the team. Focus on clarity and actionability. Prioritize any items with a low level (4 or 5) or specific notes about damage or safety.\n\nFINDINGS REQUIRING ATTENTION:\n${badFindings}`;
+                    }
+
+                    callGeminiAPI(prompt, button);
+                });
+            });
+            
+            function generateEmailHTML(data) {
+                let reportContent = `
+                    <h1 style="font-family: sans-serif; font-size: 24px; font-weight: bold; margin-bottom: 20px;">${data.title}</h1>
+                    <p style="font-family: sans-serif;"><strong>Building:</strong> ${data.building || 'N/A'}</p>
+                    <p style="font-family: sans-serif;"><strong>Inspection Date:</strong> ${data.date || 'N/A'}</p>
+                    <p style="font-family: sans-serif;"><strong>Submission Date:</strong> ${new Date().toLocaleString()}</p>
+                    <p style="font-family: sans-serif;"><strong>Inspector:</strong> ${data.inspector || 'N/A'}</p>
+                    <hr style="margin: 20px 0;">
+                `;
+
+                data.details.forEach(detail => {
+                    reportContent += `
+                        <div style="margin-top: 10px; font-family: sans-serif;">
+                            <p><strong>${detail.item}:</strong> ${detail.rating}</p>
+                            ${detail.notes ? `<p style="font-style: italic; color: #555; margin-left:15px;">Notes: ${detail.notes}</p>` : ''}
+                        </div>
+                    `;
+                });
+                
+                reportContent += `<hr style="margin: 20px 0;"><h3>Summary</h3>`;
+                reportContent += `<p style="font-family: sans-serif;"><strong>Areas of Success:</strong><br>${data.success.replace(/\n/g, '<br>') || 'None noted.'}</p>`;
+                reportContent += `<p style="font-family: sans-serif;"><strong>Areas for Improvement:</strong><br>${data.improvement.replace(/\n/g, '<br>') || 'None noted.'}</p>`;
+                
+                return reportContent;
+            }
+
+            submitAndEmailBtn.addEventListener('click', async function() {
+                // !! IMPORTANT !! PASTE YOUR POWER AUTOMATE URL HERE
+                const powerAutomateUrl = 'https://defaultec37a091b9a647e598d0903d4a4192.03.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/da9ca2f832b44a5fb19f50d0462068b3/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=-sb1eRCUppSwjFPD_zX02_25KpU78k4QIbZwjDffrQU';
+
+                if (powerAutomateUrl === 'PASTE_YOUR_URL_HERE') {
+                    statusMessage.textContent = 'Error: Power Automate URL is not set in the HTML file.';
+                    statusMessage.style.color = 'red';
+                    return; 
+                }
+
+                submitAndEmailBtn.disabled = true;
+
+                let payload = {};
+                let reportData = { details: [] };
+                let checklistContainer, buildingElem, dateElem, inspectorElem, successElem, improvementElem;
+
+                if (activeView === 'custodial') {
+                    payload.type = 'custodial';
+                    reportData.title = 'Custodial Evaluation Report';
+                    checklistContainer = custodialChecklistContainer;
+                    buildingElem = document.getElementById('custodial-building');
+                    dateElem = document.getElementById('custodial-date');
+                    inspectorElem = document.getElementById('custodial-inspector');
+                    successElem = document.getElementById('custodial-success');
+                    improvementElem = document.getElementById('custodial-improvement');
+                } else {
+                    payload.type = 'maintenance';
+                    reportData.title = 'Maintenance Evaluation Report';
+                    checklistContainer = maintenanceChecklistContainer;
+                    buildingElem = document.getElementById('maintenance-building');
+                    dateElem = document.getElementById('maintenance-date');
+                    inspectorElem = document.getElementById('maintenance-inspector');
+                    successElem = document.getElementById('maintenance-success');
+                    improvementElem = document.getElementById('maintenance-improvement');
+                }
+
+                payload.building = buildingElem.value;
+                payload.date = dateElem.value;
+                payload.inspector = inspectorElem.value;
+                payload.success = successElem.value;
+                payload.improvement = improvementElem.value;
+                payload.details = [];
+                
+                Object.assign(reportData, { building: payload.building, date: payload.date, inspector: payload.inspector, success: payload.success, improvement: payload.improvement });
+
+                checklistContainer.querySelectorAll('select.appa-level-select').forEach(select => {
+                    const itemWrapper = select.closest('.p-4');
+                    const item = itemWrapper.querySelector('label').textContent;
+                    const ratingValue = select.value;
+                    const notesValue = itemWrapper.querySelector('textarea').value;
+                    if (ratingValue !== '0' || notesValue) {
+                        const itemData = {
+                            item: item,
+                            rating: `Level ${ratingValue}`,
+                            notes: notesValue
+                        };
+                        payload.details.push(itemData);
+                        reportData.details.push(itemData);
+                    }
+                });
+                
+                payload.emailReportHTML = generateEmailHTML(reportData);
+
+                statusMessage.style.color = '#009A44'; // UND Green
+                statusMessage.textContent = 'Submitting to SharePoint and sending email...';
+                
+                try {
+                    const response = await fetch(powerAutomateUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+
+                    if (response.ok) {
+                        statusMessage.style.color = '#009A44'; // UND Green
+                        statusMessage.textContent = 'Successfully submitted and email sent!';
+                    } else {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                } catch (error) {
+                    statusMessage.style.color = 'red';
+                    statusMessage.textContent = 'Error during submission. See console for details.';
+                    console.error('Submission Error:', error);
+                }
+
+                setTimeout(() => {
+                    submitAndEmailBtn.disabled = false;
+                    if (statusMessage.style.color !== 'red') {
+                       statusMessage.textContent = '';
+                    }
+                }, 4000);
+            });
+        });
+    </script>
+</body>
+</html>
