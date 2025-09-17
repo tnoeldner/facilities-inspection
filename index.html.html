@@ -6,7 +6,7 @@
     <title>University Housing Inspection Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chosen Palette: University of North Dakota Branding -->
-    <!-- Application Structure Plan: A task-oriented SPA with two primary views, 'Custodial' and 'Maintenance', toggled by top-level buttons. This structure directly mirrors the user's goal of performing one of two distinct inspection types. Each view contains an interactive checklist where users can select ratings from dropdowns, add notes, and receive instant visual feedback (contextual descriptions). A final 'Submit & Email' function provides a clear, actionable output. This design was chosen to transform static checklists into an efficient, user-friendly digital workflow. -->
+    <!-- Application Structure Plan: A task-oriented SPA with three primary views, 'Custodial', 'Maintenance', and 'Grounds', toggled by top-level buttons. This structure directly mirrors the user's goal of performing one of three distinct inspection types. Each view contains an interactive checklist where users can select ratings from dropdowns, add notes, and receive instant visual feedback (contextual descriptions). A final 'Submit & Email' function provides a clear, actionable output. This design was chosen to transform static checklists into an efficient, user-friendly digital workflow. -->
     <!-- Visualization & Content Choices: Checklist -> Goal: Standardize evaluation -> Method: Interactive HTML form with dropdowns for APPA Levels 1-5 -> Interaction: Selecting a level dynamically displays its official description for inspector reference. Justification: Provides crucial context and ensures consistent scoring. General -> Goal: Export findings -> Method: HTML/JS 'Submit & Email' button -> Interaction: Gathers all form data, saves to SharePoint, and sends a formatted HTML email. Justification: Creates a tangible, shareable output for record-keeping and action plans. CONFIRMED: No SVG/Mermaid used; all visuals are HTML/CSS. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
@@ -63,9 +63,10 @@
             <p class="text-gray-500 mt-2">Use the checklists below to evaluate building conditions based on APPA standards and best practices.</p>
         </header>
 
-        <nav class="flex justify-center mb-8 bg-white p-2 rounded-lg shadow-sm w-full md:w-auto mx-auto">
-            <button id="show-custodial" class="nav-button active text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-md">Custodial Evaluation</button>
-            <button id="show-maintenance" class="nav-button text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-md">Maintenance Evaluation</button>
+        <nav class="flex flex-wrap justify-center mb-8 bg-white p-2 rounded-lg shadow-sm w-full md:w-auto mx-auto">
+            <button id="show-custodial" class="nav-button active text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-md">Custodial</button>
+            <button id="show-maintenance" class="nav-button text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-md">Maintenance</button>
+            <button id="show-grounds" class="nav-button text-sm md:text-base font-semibold py-2 px-4 md:px-6 rounded-md">Grounds</button>
         </nav>
 
         <main id="main-content">
@@ -189,6 +190,65 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Grounds View -->
+            <div id="grounds-view" class="hidden">
+                 <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                    <h2 class="text-2xl font-bold mb-4 text-[#009A44]">Grounds Evaluation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <select id="grounds-building" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                            <option value="">Select a Building/Area...</option>
+                             <option value="Noren Hall">Noren Hall</option>
+                            <option value="Selke Hall">Selke Hall</option>
+                            <option value="Brannon Hall">Brannon Hall</option>
+                            <option value="McVey Hall">McVey Hall</option>
+                            <option value="West Hall">West Hall</option>
+                            <option value="Landing Zone">Landing Zone</option>
+                            <option value="Wilkerson Commons">Wilkerson Commons</option>
+                            <option value="Swanson Hall">Swanson Hall</option>
+                            <option value="Smith Hall">Smith Hall</option>
+                            <option value="Johnstone Hall">Johnstone Hall</option>
+                            <option value="University Place">University Place</option>
+                            <option value="3600 Campus Rd">3600 Campus Rd</option>
+                            <option value="3605 Manitoba">3605 Manitoba</option>
+                            <option value="110 State St">110 State St</option>
+                            <option value="Williamsburg">Williamsburg</option>
+                            <option value="Mt. Vernon">Mt. Vernon</option>
+                            <option value="Virginia Rose">Virginia Rose</option>
+                            <option value="Townhouses">Townhouses</option>
+                            <option value="72 Plex">72 Plex</option>
+                            <option value="Berkely Drive">Berkely Drive</option>
+                            <option value="540 CC">540 CC</option>
+                            <option value="550 CC">550 CC</option>
+                            <option value="580 CC">580 CC</option>
+                            <option value="560 CC">560 CC</option>
+                            <option value="570 CC">570 CC</option>
+                        </select>
+                        <input type="date" id="grounds-date" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                        <input type="text" id="grounds-inspector" placeholder="Inspector Name" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#009A44]">
+                    </div>
+                     <div class="bg-[#e6f5ec] border-l-4 border-[#009A44] text-green-900 p-4 rounded-md mb-6">
+                        <h4 class="font-bold">APPA Service Levels</h4>
+                        <p class="text-sm">Select a level for each item. The definition will appear below it. Click the help button (?) on an item for the detailed rubric.</p>
+                    </div>
+                    
+                    <div id="grounds-checklist"></div>
+
+                    <div class="mt-8">
+                         <h3 class="text-xl font-bold mb-2 text-gray-700">Summary & Follow-Up</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <textarea id="grounds-success" placeholder="Areas of Success..." class="w-full p-2 border rounded-md h-24 mb-2"></textarea>
+                                <button class="gemini-btn font-semibold py-1 px-3 rounded-md text-sm w-full" data-target="grounds-success" data-type="success">✨ Summarize Successes</button>
+                            </div>
+                            <div>
+                                <textarea id="grounds-improvement" placeholder="Areas for Improvement / Urgent Repairs..." class="w-full p-2 border rounded-md h-24 mb-2"></textarea>
+                                <button class="gemini-btn font-semibold py-1 px-3 rounded-md text-sm w-full" data-target="grounds-improvement" data-type="improvement">✨ Suggest Improvements</button>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="text-center mt-8">
                 <button id="submit-and-email" class="bg-black text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors shadow-lg">
@@ -218,8 +278,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             const custodialView = document.getElementById('custodial-view');
             const maintenanceView = document.getElementById('maintenance-view');
+            const groundsView = document.getElementById('grounds-view');
             const showCustodialBtn = document.getElementById('show-custodial');
             const showMaintenanceBtn = document.getElementById('show-maintenance');
+            const showGroundsBtn = document.getElementById('show-grounds');
             const submitAndEmailBtn = document.getElementById('submit-and-email');
             const statusMessage = document.getElementById('status-message');
             const mainContent = document.getElementById('main-content');
@@ -231,22 +293,13 @@
 
             let activeView = 'custodial';
             
-            const custodialAppaLevels = {
+            const appaLevels = {
                 '0': 'Select a level...',
-                '1': 'Level 1: Orderly Spotlessness',
-                '2': 'Level 2: Ordinary Tidiness',
-                '3': 'Level 3: Casual Inattention',
-                '4': 'Level 4: Moderate Dinginess',
-                '5': 'Level 5: Unkempt Neglect'
-            };
-
-            const maintenanceAppaLevels = {
-                '0': 'Select a level...',
-                '1': 'Level 1: Like-New Condition',
-                '2': 'Level 2: Good Condition',
-                '3': 'Level 3: Fair Condition',
-                '4': 'Level 4: Poor Condition',
-                '5': 'Level 5: Critical/Failed Condition'
+                '1': 'Level 1',
+                '2': 'Level 2',
+                '3': 'Level 3',
+                '4': 'Level 4',
+                '5': 'Level 5'
             };
 
             const custodialData = [
@@ -262,9 +315,15 @@
                 { category: 'Apartments/Dorms (Sample Inspection)', items: ['Door & Lockset', 'Paint & Wall Condition', 'Flooring Condition', 'Windows & Blinds', 'Plumbing Fixtures', 'Appliances (If applicable)', 'Lighting & Electrical'] }
             ];
 
-            const custodialItemHelpContent = {
-                'Flooring (Hard Surface)': `<strong>Level 1:</strong> High gloss finish, free of streaks, scuffs, and dirt. Corners and edges are spotless.<br><strong>Level 3:</strong> Generally clean but may have a dull finish, minor scuffs, or slight dirt buildup in corners.<br><strong>Level 5:</strong> Visibly dirty, sticky, or stained. Obvious neglect.`,
-                'Flooring (Carpet/Rugs)': `<strong>Level 1:</strong> Uniform appearance, no spots, stains, or matted areas. Smells fresh.<br><strong>Level 3:</strong> Clean from vacuuming, but may have small, old stains. High-traffic areas may show some wear.<br><strong>Level 5:</strong> Multiple large stains, matted appearance, visible debris, and/or unpleasant odor.`,
+            const groundsData = [
+                { category: 'Landscaping (Seasonal)', items: ['Turf & Lawn Health', 'Edging (Walks, Curbs)', 'Plant Beds & Mulch', 'Trees & Shrubs Pruning', 'Weed Control', 'Litter & Debris Removal'] },
+                { category: 'Hardscapes & Site Amenities', items: ['Walkways & Patios Condition', 'Benches & Site Furniture', 'Trash & Ash Receptacles', 'Bike Racks', 'Signage'] },
+                { category: 'Snow & Ice Removal (Seasonal)', items: ['Walkway & Sidewalk Clarity', 'Entrances & ADA Ramps', 'Stairs & Landings', 'De-Icing Application', 'Snow Pile Placement'] }
+            ];
+
+            const allHelpContent = {
+                'Flooring (Hard Surface)': `<strong>Level 1:</strong> High gloss finish, free of streaks, scuffs, and dirt.<br><strong>Level 3:</strong> Generally clean but may have a dull finish or minor scuffs.<br><strong>Level 5:</strong> Visibly dirty, sticky, or stained.`,
+                'Flooring (Carpet/Rugs)': `<strong>Level 1:</strong> Uniform appearance, no spots or stains.<br><strong>Level 3:</strong> Clean from vacuuming, but may have small, old stains.<br><strong>Level 5:</strong> Multiple large stains or visible debris.`,
                 'Walls & Baseboards': `<strong>Level 1:</strong> Free of all marks, scuffs, and fingerprints. Baseboards are completely clean.<br><strong>Level 3:</strong> Minor scuffs or marks are visible upon close inspection. Baseboards may have dust.<br><strong>Level 5:</strong> Widespread marks, graffiti, or heavy soil. Baseboards are dirty or damaged.`,
                 'Entrances & Glass': `<strong>Level 1:</strong> Glass is perfectly clear, free of streaks, smudges, and handprints. Door frames and hardware are clean.<br><strong>Level 3:</strong> Glass is mostly clean but has a few minor smudges or streaks. Some dust on frames.<br><strong>Level 5:</strong> Glass is cloudy, covered in handprints, or has heavy soil.`,
                 'Furniture & Upholstery': `<strong>Level 1:</strong> Arranged neatly, dust-free, and upholstery is free of spots or stains.<br><strong>Level 3:</strong> Generally tidy but may have light dust or a few minor spots on upholstery.<br><strong>Level 5:</strong> Visibly dusty, stained, or disarranged.`,
@@ -283,10 +342,7 @@
                 'Countertops & Sinks': `See "Sinks & Countertops" rubric.`,
                 'Appliances (Exterior)': `<strong>Level 1:</strong> Exteriors of all appliances are spotless, free of fingerprints, spills, and grease.<br><strong>Level 3:</strong> Appliances are wiped down but may have minor streaks or fingerprints.<br><strong>Level 5:</strong> Appliances have visible spills, grease, or heavy soiling.`,
                 'Laundry Machines (Exterior)': `<strong>Level 1:</strong> Exteriors, lids, and control panels are clean and free of detergent residue or dust.<br><strong>Level 3:</strong> Machines have minor dust or detergent residue.<br><strong>Level 5:</strong> Machines are heavily soiled with spilled detergent, dirt, or lint.`,
-                'Furniture (Tables/Chairs)': `<strong>Level 1:</strong> Tables and chairs are clean, wiped down, and arranged neatly.<br><strong>Level 3:</strong> Surfaces are generally clean but may have crumbs or be slightly out of place.<br><strong>Level 5:</strong> Surfaces are sticky, dirty, or cluttered. Furniture is disorganized.`
-            };
-            
-            const maintenanceItemHelpContent = {
+                'Furniture (Tables/Chairs)': `<strong>Level 1:</strong> Tables and chairs are clean, wiped down, and arranged neatly.<br><strong>Level 3:</strong> Surfaces are generally clean but may have crumbs or be slightly out of place.<br><strong>Level 5:</strong> Surfaces are sticky, dirty, or cluttered. Furniture is disorganized.`,
                 'Foundation & Walls': `<strong>Level 1:</strong> No visible cracks, spalling, or water intrusion. Paint or brickwork is in perfect condition.<br><strong>Level 3:</strong> Minor, non-structural hairline cracks or minor efflorescence (white, powdery deposits).<br><strong>Level 5:</strong> Significant structural cracks, water damage, or spalling (flaking/chipping) is visible.`,
                 'Windows & Seals': `<strong>Level 1:</strong> Glass is intact, seals are perfect with no drafts or condensation. Hardware operates smoothly.<br><strong>Level 3:</strong> Minor drafts can be felt. Seal may show signs of aging. Hardware is functional but may be stiff.<br><strong>Level 5:</strong> Window is broken, seal has failed (fogging between panes), or it will not lock/close properly.`,
                 'Doors & Hardware': `<strong>Level 1:</strong> Door opens, closes, and latches smoothly. No damage to door or frame. Closer works correctly.<br><strong>Level 3:</strong> Door squeaks or rubs the frame. Finish is worn. Hardware is functional but loose.<br><strong>Level 5:</strong> Door does not close, latch, or lock. Significant damage to the door or frame.`,
@@ -307,11 +363,27 @@
                 'Door & Lockset': `<strong>Level 1:</strong> Door, frame, and hardware are in perfect condition. Door opens, closes, and locks smoothly.<br><strong>Level 3:</strong> Door or frame have minor cosmetic damage. Lock is functional but may be sticky.<br><strong>Level 5:</strong> Door is damaged and will not close or lock. Lockset is broken.`,
                 'Windows & Blinds': `<strong>Level 1:</strong> Window is in perfect condition (see exterior). Blinds are clean, intact, and operate smoothly.<br><strong>Level 3:</strong> Blinds may have slightly bent slats or be difficult to operate.<br><strong>Level 5:</strong> Blinds are broken, missing slats, or non-functional.`,
                 'Plumbing Fixtures': `<strong>Level 1:</strong> All fixtures (sinks, toilets, showers) are in perfect working order with no leaks, clogs, or cosmetic damage.<br><strong>Level 3:</strong> A faucet drips, a toilet runs intermittently, or a drain is slow.<br><strong>Level 5:</strong> Fixture is non-functional, has a significant leak, or is badly damaged.`,
-                'Appliances (If applicable)': `<strong>Level 1:</strong> All appliances are clean and in perfect working order.<br><strong>Level 3:</strong> An appliance is functional but may be noisy or show signs of significant wear.<br><strong>Level 5:</strong> An essential appliance (refrigerator, stove) is non-functional.`
+                'Appliances (If applicable)': `<strong>Level 1:</strong> All appliances are clean and in perfect working order.<br><strong>Level 3:</strong> An appliance is functional but may be noisy or show signs of significant wear.<br><strong>Level 5:</strong> An essential appliance (refrigerator, stove) is non-functional.`,
+                'Turf & Lawn Health': `<strong>Level 1:</strong> Turf is lush, green, and evenly mown. Free of weeds and bare spots.<br><strong>Level 3:</strong> Turf is generally healthy but may have some weeds or small, thin areas.<br><strong>Level 5:</strong> Large bare spots, widespread weeds, or stressed/dormant turf.`,
+                'Edging (Walks, Curbs)': `<strong>Level 1:</strong> A sharp, clean edge exists between turf and hardscapes. No overgrowth.<br><strong>Level 3:</strong> A defined edge is present, but some grass may be creeping over.<br><strong>Level 5:</strong> No defined edge. Turf is growing over walkways or curbs.`,
+                'Plant Beds & Mulch': `<strong>Level 1:</strong> Beds are well-defined and fully covered with a fresh layer of mulch. No weeds.<br><strong>Level 3:</strong> Mulch is thin in some areas; a few small weeds are present.<br><strong>Level 5:</strong> Beds are overrun with weeds, or mulch is washed out and bare soil is exposed.`,
+                'Trees & Shrubs Pruning': `<strong>Level 1:</strong> All plants are properly pruned according to horticultural standards. No dead branches or overgrowth obstructing paths.<br><strong>Level 3:</strong> Minor pruning needed; some dead twigs or sucker growth visible.<br><strong>Level 5:</strong> Significant overgrowth, dead branches, or plants are obstructing walkways/windows.`,
+                'Weed Control': `<strong>Level 1:</strong> All areas, including pavement cracks, are 99-100% free of weeds.<br><strong>Level 3:</strong> Some small weeds are visible in cracks or plant beds.<br><strong>Level 5:</strong> Weeds are widespread and detract from the overall appearance.`,
+                'Litter & Debris Removal': `<strong>Level 1:</strong> Entire area is free of litter, cigarette butts, and natural debris (sticks, excess leaves).<br><strong>Level 3:</strong> A few small pieces of litter are visible upon close inspection.<br><strong>Level 5:</strong> Litter is obvious and widespread across the area.`,
+                'Walkways & Patios Condition': `<strong>Level 1:</strong> Hardscapes are clean, free of debris, and have no cracks or trip hazards.<br><strong>Level 3:</strong> Minor surface cracks or stains. May need sweeping.<br><strong>Level 5:</strong> Significant cracks, heaving, or surface degradation creating a trip hazard.`,
+                'Benches & Site Furniture': `<strong>Level 1:</strong> Clean, in good repair, with no damage or graffiti.<br><strong>Level 3:</strong> Functional but may have minor cosmetic issues like scratches or faded paint.<br><strong>Level 5:</strong> Broken, unsafe, or heavily damaged/vandalized.`,
+                'Trash & Ash Receptacles': `<strong>Level 1:</strong> Empty, clean, and in good condition. Not overflowing.<br><strong>Level 3:</strong> Approaching full or has minor exterior dirt.<br><strong>Level 5:</strong> Overflowing with trash, dirty, or damaged.`,
+                'Bike Racks': `<strong>Level 1:</strong> In good condition, securely anchored, and free of abandoned bikes/locks.<br><strong>Level 3:</strong> Functional but may have cosmetic wear or a single abandoned bike.<br><strong>Level 5:</strong> Damaged, loose, or cluttered with multiple abandoned bikes.`,
+                'Signage': `<strong>Level 1:</strong> Signs are clean, legible, and in good condition.<br><strong>Level 3:</strong> Minor fading or dirt but still fully legible.<br><strong>Level 5:</strong> Damaged, illegible, or missing.`,
+                'Walkway & Sidewalk Clarity': `<strong>Level 1:</strong> Completely clear of snow and ice, edge to edge. Bare pavement is visible.<br><strong>Level 3:</strong> Main path is clear, but some snow/ice remains along edges. Generally safe.<br><strong>Level 5:</strong> Significant accumulation creating clear slip-and-fall hazards. Unsafe.`,
+                'Entrances & ADA Ramps': `<strong>Level 1:</strong> Highest priority. Completely clear of snow and ice. Meets or exceeds accessibility standards.<br><strong>Level 3:</strong> Clear and accessible, but may require minor touch-up of refrozen areas.<br><strong>Level 5:</strong> Obstructed, icy, or otherwise inaccessible and unsafe.`,
+                'Stairs & Landings': `<strong>Level 1:</strong> All steps and landings are completely clear of snow and ice. Handrails are accessible.<br><strong>Level 3:</strong> Steps are passable but may have minor snow/ice buildup in corners.<br><strong>Level 5:</strong> Steps are hazardous, covered in ice or deep snow.`,
+                'De-Icing Application': `<strong>Level 1:</strong> De-icing agent (salt, sand) is applied appropriately and effectively. No icy patches.<br><strong>Level 3:</strong> De-icer has been applied but some refreezing is occurring on slick spots.<br><strong>Level 5:</strong> No evidence of de-icing application in hazardous areas.`,
+                'Snow Pile Placement': `<strong>Level 1:</strong> Snow is piled in designated areas, not obstructing sightlines, parking, or drainage.<br><strong>Level 3:</strong> Snow piles are generally well-placed but may be slightly encroaching on a parking space.<br><strong>Level 5:</strong> Snow piles are obstructing traffic sightlines, blocking hydrants, or will cause drainage problems upon melting.`
             };
-
+            
             function createChecklist(container, data) {
-                container.innerHTML = '';
+                 container.innerHTML = '';
                 data.forEach(section => {
                     const sectionDiv = document.createElement('div');
                     sectionDiv.className = 'mb-8';
@@ -374,36 +446,51 @@
 
             const maintenanceChecklistContainer = document.getElementById('maintenance-checklist');
             createChecklist(maintenanceChecklistContainer, maintenanceData);
+            
+            const groundsChecklistContainer = document.getElementById('grounds-checklist');
+            createChecklist(groundsChecklistContainer, groundsData);
 
-            function handleAppaSelectChange(e, levelDescriptions) {
+            function handleAppaSelectChange(e) {
                 const select = e.target;
                 if (select.classList.contains('appa-level-select')) {
                     const level = select.value;
                     const helpText = select.nextElementSibling;
-                    helpText.textContent = levelDescriptions[level];
+                    let descriptions = {};
+                    if(activeView === 'custodial' || activeView === 'grounds') {
+                       descriptions = {...appaLevels, '1': 'Level 1: Orderly Spotlessness', '2': 'Level 2: Ordinary Tidiness', '3': 'Level 3: Casual Inattention', '4': 'Level 4: Moderate Dinginess', '5': 'Level 5: Unkempt Neglect' };
+                    } else {
+                       descriptions = {...appaLevels, '1': 'Level 1: Like-New Condition', '2': 'Level 2: Good Condition', '3': 'Level 3: Fair Condition', '4': 'Level 4: Poor Condition', '5': 'Level 5: Critical/Failed Condition'};
+                    }
+                    helpText.textContent = descriptions[level];
                 }
             }
             
-            custodialChecklistContainer.addEventListener('change', (e) => handleAppaSelectChange(e, custodialAppaLevels));
-            maintenanceChecklistContainer.addEventListener('change', (e) => handleAppaSelectChange(e, maintenanceAppaLevels));
+            mainContent.addEventListener('change', handleAppaSelectChange);
             
             function switchView(view) {
                 activeView = view;
+                custodialView.classList.add('hidden');
+                maintenanceView.classList.add('hidden');
+                groundsView.classList.add('hidden');
+                showCustodialBtn.classList.remove('active');
+                showMaintenanceBtn.classList.remove('active');
+                showGroundsBtn.classList.remove('active');
+
                 if (view === 'custodial') {
                     custodialView.classList.remove('hidden');
-                    maintenanceView.classList.add('hidden');
                     showCustodialBtn.classList.add('active');
-                    showMaintenanceBtn.classList.remove('active');
-                } else {
-                    custodialView.classList.add('hidden');
+                } else if (view === 'maintenance') {
                     maintenanceView.classList.remove('hidden');
-                    showCustodialBtn.classList.remove('active');
                     showMaintenanceBtn.classList.add('active');
+                } else if (view === 'grounds') {
+                    groundsView.classList.remove('hidden');
+                    showGroundsBtn.classList.add('active');
                 }
             }
             
             showCustodialBtn.addEventListener('click', () => switchView('custodial'));
             showMaintenanceBtn.addEventListener('click', () => switchView('maintenance'));
+            showGroundsBtn.addEventListener('click', () => switchView('grounds'));
 
             // Modal Logic
             function showModal(title, content) {
@@ -426,17 +513,13 @@
             mainContent.addEventListener('click', (e) => {
                 if(e.target.classList.contains('help-btn')) {
                     const item = e.target.dataset.item;
-                    if (activeView === 'custodial') {
-                        showModal(item, custodialItemHelpContent[item]);
-                    } else {
-                        showModal(item, maintenanceItemHelpContent[item] || custodialItemHelpContent[item]);
-                    }
+                    showModal(item, allHelpContent[item]);
                 }
             });
 
             async function callGeminiAPI(prompt, button) {
                 // !! IMPORTANT !! PASTE YOUR GEMINI API KEY HERE
-                const apiKey = "AIzaSyCxo29Q6HRHRzxTuTU_IanG9yvJmctdzb0"; 
+                const apiKey = "AIzaSyDtKySTzqNUKQDge4kBrhaOLC12iijgHis"; 
                 if (apiKey === "PASTE_YOUR_GEMINI_API_KEY_HERE") {
                     console.error("Gemini API key is not set.");
                     const targetId = button.dataset.target;
@@ -486,10 +569,14 @@
                         checklistContainer = custodialChecklistContainer;
                         building = document.getElementById('custodial-building').value || 'the building';
                         evaluationType = 'custodial';
-                    } else {
+                    } else if (activeView === 'maintenance') {
                         checklistContainer = maintenanceChecklistContainer;
                         building = document.getElementById('maintenance-building').value || 'the building';
                         evaluationType = 'maintenance';
+                    } else {
+                        checklistContainer = groundsChecklistContainer;
+                        building = document.getElementById('grounds-building').value || 'the area';
+                        evaluationType = 'grounds';
                     }
 
                     checklistContainer.querySelectorAll('select.appa-level-select').forEach(select => {
@@ -525,7 +612,7 @@
             function generateEmailHTML(data) {
                 let reportContent = `
                     <h1 style="font-family: sans-serif; font-size: 24px; font-weight: bold; margin-bottom: 20px;">${data.title}</h1>
-                    <p style="font-family: sans-serif;"><strong>Building:</strong> ${data.building || 'N/A'}</p>
+                    <p style="font-family: sans-serif;"><strong>Building/Area:</strong> ${data.building || 'N/A'}</p>
                     <p style="font-family: sans-serif;"><strong>Inspection Date:</strong> ${data.date || 'N/A'}</p>
                     <p style="font-family: sans-serif;"><strong>Submission Date:</strong> ${new Date().toLocaleString()}</p>
                     <p style="font-family: sans-serif;"><strong>Inspector:</strong> ${data.inspector || 'N/A'}</p>
@@ -573,7 +660,7 @@
                     inspectorElem = document.getElementById('custodial-inspector');
                     successElem = document.getElementById('custodial-success');
                     improvementElem = document.getElementById('custodial-improvement');
-                } else {
+                } else if (activeView === 'maintenance') {
                     payload.type = 'maintenance';
                     reportData.title = 'Maintenance Evaluation Report';
                     checklistContainer = maintenanceChecklistContainer;
@@ -582,6 +669,15 @@
                     inspectorElem = document.getElementById('maintenance-inspector');
                     successElem = document.getElementById('maintenance-success');
                     improvementElem = document.getElementById('maintenance-improvement');
+                } else { // Grounds
+                    payload.type = 'grounds';
+                    reportData.title = 'Grounds Evaluation Report';
+                    checklistContainer = groundsChecklistContainer;
+                    buildingElem = document.getElementById('grounds-building');
+                    dateElem = document.getElementById('grounds-date');
+                    inspectorElem = document.getElementById('grounds-inspector');
+                    successElem = document.getElementById('grounds-success');
+                    improvementElem = document.getElementById('grounds-improvement');
                 }
 
                 payload.building = buildingElem.value;
@@ -644,3 +740,4 @@
     </script>
 </body>
 </html>
+
